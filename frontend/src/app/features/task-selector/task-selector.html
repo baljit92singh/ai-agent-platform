@@ -1,0 +1,86 @@
+<div class="page-container">
+  <h1>AI Agent Task Automation</h1>
+
+  <p>Select a task and let AI handle the execution.</p>
+
+  <form [formGroup]="selectionForm">
+    <mat-form-field appearance="outline">
+      <mat-label>Select Category</mat-label>
+
+      <mat-select formControlName="category" (selectionChange)="onCategoryChange($event.value)">
+        <mat-option *ngFor="let category of categories" [value]="category.id">
+          {{ category.name }}
+        </mat-option>
+      </mat-select>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Select Task</mat-label>
+
+      <mat-select formControlName="task" (selectionChange)="onTaskChange($event.value)">
+        <mat-option *ngFor="let task of tasks" [value]="task.id">
+          {{ task.name }}
+        </mat-option>
+      </mat-select>
+    </mat-form-field>
+  </form>
+
+  <form *ngIf="selectedTask" [formGroup]="dynamicForm">
+    <h2>{{ selectedTask.name }}</h2>
+
+    <p>{{ selectedTask.description }}</p>
+
+    <ng-container *ngFor="let input of selectedTask.inputs">
+      <mat-form-field appearance="outline">
+        <mat-label>{{ input.label }}</mat-label>
+
+        <textarea
+          *ngIf="input.type === 'textarea'"
+          matInput
+          [formControlName]="input.name"
+          rows="4"
+        >
+        </textarea>
+
+        <input *ngIf="input.type === 'text'" matInput [formControlName]="input.name" />
+
+        <mat-select *ngIf="input.type === 'select'" [formControlName]="input.name">
+          <mat-option *ngFor="let option of input.options" [value]="option">
+            {{ option }}
+          </mat-option>
+        </mat-select>
+
+        <mat-error *ngIf="dynamicForm.get(input.name)?.hasError('required')">
+          {{ input.label }} is required
+        </mat-error>
+      </mat-form-field>
+    </ng-container>
+
+    <button mat-raised-button color="primary" type="button" (click)="runAgent()">
+      Run AI Agent
+    </button>
+  </form>
+
+  <p *ngIf="loading">Loading...</p>
+
+  <p *ngIf="errorMessage">{{ errorMessage }}</p>
+
+  <!-- Loading -->
+  <div *ngIf="isGenerating" class="loading-container">
+    <p>AI Agent is thinking...</p>
+  </div>
+
+  <!-- Error -->
+  <div *ngIf="errorMessage" class="error-container">
+    {{ errorMessage }}
+  </div>
+
+  <!-- AI Response -->
+  <div *ngIf="aiResponse" class="response-container">
+    <h2>AI Generated Response</h2>
+
+    <div class="response-content">
+      <pre>{{ aiResponse }}</pre>
+    </div>
+  </div>
+</div>
